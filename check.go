@@ -305,6 +305,10 @@ func (c *CheckRunner) UpdateCheck(checkID types.CheckID, status, output string) 
 
 	// Do nothing if update is idempotent
 	if check.Status == status && check.Output == output {
+		// record critical time if current esm doesn't know
+		if status == api.HealthCritical && c.checksCritical[checkID].IsZero() {
+			c.checksCritical[checkID] = time.Now()
+		}
 		check.failureCounter = decrementCounter(check.failureCounter)
 		check.successCounter = decrementCounter(check.successCounter)
 		return
